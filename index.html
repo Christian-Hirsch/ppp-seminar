@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Der Poisson'sche Punktprozess</title>
+
+		<link rel="stylesheet" href="static/reveal.css">
+		<link rel="stylesheet" href="static/white.css" id="theme">
+
+
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<div class="slides">
+				<section>
+					<h1>Der Poisson'sche Punktprozess</h1>
+					<h4>Christian Hirsch</h4>
+					<h4>20. Februar 2017</h4>
+
+				</section>
+
+				<section>
+					<h2>&Uuml;bersicht</h2>
+					<ol>
+						<li>Poissonverteilung</li>
+						<li>Punktprozesse</li>
+						<li>Poisson'sche Punktprozesse</li>
+						<li>Mecke Gleichung</li>
+						<li>Mappings, Markings, Thinnings</li>
+					</ol>
+				</section>
+
+
+				<section>
+					<section>
+						<h2>Poissonverteilung</h2>
+						\(\def\R{\mathbb{R}}
+						\def\E{\mathbb{E}}
+						\def\ms{\mathsf}
+						\def\mc{\mathcal}
+
+						\)
+						<p>Die <font color = "blue">Poissonverteilung mit Parameter $\lambda > 0$</font> ist definiert durch <font color = "blue">$$\mathbb{P}(\mathsf{Po}(\lambda)=k) = e^{-\lambda}\frac{\lambda^k}{k!}$$</font></p><br/>
+
+					</section>
+
+					<section>
+						<canvas id="myChart" width="600" height="600"  style="margin:auto; border:0px solid #000000;"></canvas>
+						<script type="text/javascript">
+Chart.defaults.global.maintainAspectRatio = true;
+Chart.defaults.global.responsive = false;
+Chart.defaults.global.legend.display = false;
+
+$.getJSON("http://www.mathematik.uni-muenchen.de/~hirsch/kaggle/poisson.json", function(json) {
+	var ctx = document.getElementById("myChart").getContext("2d");;
+
+	var data4 = {
+		labels: [],
+		datasets: [
+		{
+			backgroundColor: 'rgba(0, 0, 0, 1.0)',
+			data: json
+		}
+		]}
+	;
+
+
+	var myChart = new Chart(ctx,{
+		type : 'bubble',
+		data : data4,
+		options: {
+			scales: {
+				xAxes: [{
+
+					display: false
+
+				}],
+				yAxes: [{
+					display: false
+
+				}]
+			}
+		}
+
+	});
+
+
+
+});
+
+
+
+						</script>
+					</section>
+					<section>
+						<h2>Anwendungen</h2>
+						<p>Highlights von <a href =https://en.wikipedia.org/wiki/Poisson_distribution> https://en.wikipedia.org/wiki/Poisson_distribution</a>
+						<ul>
+							<li>Anzahl Anrufe</li> 
+							<li>Schadenanzahl im Versicherungskontext</li> 
+							<li>Anzahl Zerf&auml;lle in radioaktivem Material</li> 
+							<li>Anzahl get&ouml;teter preussischer Soldaten durch Pferdetritte</li> 
+						</ul>
+
+					</section>
+
+
+					<section>
+						<h2>Eigenschaften</h2>
+						<ul>
+							<li> <font color = "blue"> $\E[\ms{Po}(\lambda)] = \ms{Var}[\ms{Po}(\lambda)]= \lambda$</font> </li>
+							<li> <font color = "blue"> Faltungsstabilit&auml;t</font>  
+								<ul>
+									<li>$\{X_i\}_{1\le i\le n}$ unabh&auml;ngig, $X_i \sim \ms{Po}(\lambda_i)$</li>
+									<li><font color = "blue">$\Rightarrow \sum_{1\le i \le n}X_i \sim \ms{Po}(\sum_{1 \le i \le n}\lambda_i)$</font></li>
+								</ul>
+								<li> <font color = "blue"> Simulation</font>  <ul>
+										<li> $\{Z_i\}_{i \ge 1}$ iid, $Z_i \sim \ms{Exp}(\lambda)$</li>
+										<li> <font color = "blue">$\Rightarrow \max\{n\ge 0:\, \sum_{i=1}^n Z_i \le 1\} \sim \ms{Po}(\lambda)$</font>
+									</ul>
+										</li>
+
+								</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Punktprozesse -- Motivation</h2>
+						<ul>
+							<li><font color = "blue">Idee. </font> Zuf&auml;llige Menge von Punkten $Z(\omega) \subset \R^d$</li>
+							<li> Formalisierung mit Hilfe von <font color = "blue">zuf&auml;lligen Z&auml;hlma&szlig;en </font>
+								<li>  <font color = "blue">$\eta(\omega, \cdot):\, B\mapsto \# (Z(\omega) \cap B)$</font>
+						</ul>
+					</section>
+
+					<section>
+						<h2>Z&auml;hlma&szlig;e</h2>
+						<ul>
+							<li>Ein Ma&szlig; $\eta$ auf $\mc{B} = \mc{B}(\R^d)$ hei&szlig;t <font color = "blue">Z&auml;hlma&szlig</font>, falls $\eta(B) \in \{0, 1,\ldots\} \cup \{\infty\}$ f&uuml;r alle $B \in \mc{B}$;</li>
+							<li><font color="blue">Beispiel.  $$\eta = \sum_{i=1}^k \delta_{x_i}$$</font> $x_1,\ldots, x_k \in \R^d$</li>
+							<li>$\eta$ hei&szlig;t <font color="blue">lokal endlich</font> falls <font color="blue">$\eta(B)< \infty$</font> f&uuml;r alle <font color="blue">beschr&auml;nkten</font> $B \in \mc{B}$ </li>
+						</ul>
+					</section>
+
+					<section>
+						<h2>Punktprozesse</h2>
+						<ul>
+							<li><font color = "blue">$\mathbf{N}_{l} = $</font> Menge der lokal endlichen Z&auml;hlma&szlig;e </li>
+							<li><font color = "blue">$\mc{N} = $</font> $\sigma$-Algebra erzeugt durch $B \mapsto \eta(B)$, $B \in \mathcal{B}$</li>
+						</ul>
+						<br></br>
+						<h3>Definition</h3>
+						<blockquote style="width:950px;">
+							Ein <font color = "blue">Punktprozess</font> ist eine $(\mathbf{N}_l, \mathcal{N})$-wertige Zufallsvariable
+						</blockquote>
+
+					</section>
+
+					<section>
+						<h2>Beispiel</h2>
+						<ul>
+							<li>$\{X_i\}_{i \ge 1}$: Zufallsvektoren in $\R^d$</li>
+							<li>$N$: Zufallsvariable in $\{0,1,\ldots\} \cup \{\infty\}$</li>
+							<li>	<font color ="blue">$\Rightarrow$ $$\sum_{i = 1}^N \delta_{X_i} $$</font> ist ein Punktprozess</li>
+						</ul>
+					</section>
+
+					<section>
+						<h2>Intensit&auml;tsmass</h2>
+						<blockquote style="width:950px;">
+							Das Ma&szlig;
+							<font color = "blue">$$\lambda(B) = \E[\eta(B)],\; B \in \mc{B}$$</font>
+							hei&szlig;t <font color = "blue">Intensit&auml;tsma&szlig;</font> von $\eta$
+						</blockquote>
+					</section>
+					<section>
+						<h2>Satz von Campbell</h2>
+						<blockquote style="width:950px;">
+							Sei $\eta$ ein Punktprozess und $f: \R^d \to [0,\infty)$ messbar. 
+							<font color = "blue">$$ \Rightarrow \E\Big[\int_{\R^d} f(x) \eta(d x)\Big] = \int_{\R^d} f(x) \lambda(d x).$$</font>
+						</blockquote>
+						<p><font color = "blue">Beachte.</font> F&uuml;r  $\eta = \sum_{i \ge 1} \delta_{X_i}$ gilt <font color = "blue">																				$$\E\Big[\int_{\R^d} f(x) \eta(d x)\Big] = \E\Big[\sum_{i \ge 1} f(X_i) \Big].$$</font></p>
+
+					</section>
+
+
+
+
+				</section>
+
+				<section>
+					<section>
+						<h2>Poisson'sche Punktprozesse</h2>
+						<canvas id="myChart" width="600" height="600"  style="margin:auto; border:0px solid #000000;"></canvas>
+						<script type="text/javascript">
+Chart.defaults.global.maintainAspectRatio = true;
+Chart.defaults.global.responsive = false;
+Chart.defaults.global.legend.display = false;
+
+$.getJSON("./poisson.json", function(json) {
+	var ctx = document.getElementById("myChart").getContext("2d");;
+
+	var data4 = {
+		labels: [],
+		datasets: [
+		{
+			backgroundColor: 'rgba(0, 0, 0, 1.0)',
+			data: json
+		}
+		]}
+	;
+
+
+	var myChart = new Chart(ctx,{
+		type : 'bubble',
+		data : data4,
+		options: {
+			scales: {
+				xAxes: [{
+
+					display: false
+
+				}],
+				yAxes: [{
+					display: false
+
+				}]
+			}
+		}
+
+	});
+
+
+
+});
+
+
+
+						</script>
+					</section>
+
+					<section>
+						<h3>Definition</h3>
+						<blockquote style="width:950px;">
+							Ein Punktprozess $\eta$ in $\R^d$ mit Intensit&auml;tsma&szlig; $\lambda$ hei&szlig;t <font color = "blue">Poisson'scher Punktprozess,</font> falls
+							<ul>
+								<li>$B \in \mc{B}(\R^d)$ <font color = "blue">$\Rightarrow\, \eta(B) \sim \ms{Po}(\lambda(B))$</font>	</li>
+								<li>$B_1,\ldots B_k \in \mc{B}(\R^d)$ pw. disjunkt <font color = "blue"><br>$\Rightarrow\, \eta(B_1), \ldots, \eta(B_k)$ unabh&auml;ngig</font>	</li>
+							</ul>
+						</blockquote>
+
+					</section>
+
+					<section>
+						<h3>Existenz</h3>
+						<blockquote style="width:950px;">
+							Sei $\lambda$ ein lokal-endliches Borelma&szlig; in $\R^d$. <br>Dann existiert ein Poissonprozess mit Intensit&auml;tsma&szlig; $\lambda$.																						</blockquote>
+
+					</section>
+
+					<section>
+						<h3>Laplace Funktional</h3>
+						<blockquote style="width:950px;">
+							Sei $\eta = \sum_{i \ge 1} \delta_{X_i}$ ein Poisson'scher Punktprozess mit Intensit&auml;tsma&szlig; $\lambda$ und $u:\, \R^d \to [0, \infty)$ messbar. <br> </br>
+							<font color = "blue">$\Rightarrow$ 
+								$\E e^{-\sum_{i\ge1} u(X_i)} = \exp\big(-\int(1 - e^{-u(x)})\lambda({\rm d} x) \big)$ </font>
+					</section>
+
+
+
+				</section>
+
+				<section>
+					<section>
+						<h3>Mecke Gleichung -- Motivation</h3>
+						<p>Sei $\eta = \sum_{i \ge 1}\delta_{X_i}$ Punktprozess mit Intensit&auml;tsma&szlig; $\lambda$</p>
+						<ul>
+							<li><font color = "blue">Campbell's Theorem $\Rightarrow$</font> $\E[\sum_{i \ge 1} f(X_i)] = \int_{\R^d} f(x) \lambda(d x)$</li>
+							<li> <font color = "blue">$\E[\sum_{i \ge 1} f(X_i, X)] =$ ??</font> </li>
+						</ul>
+						<h3>Beispiele</h3>
+						<ul>
+							<li><font color = "blue"> $r$-isolierte Punkte</font> $\Rightarrow$ $f(x, \eta) = 1_{\eta \cap B_r(x)= \{x\}} $	</li>
+							<li><font color = "blue"> Punktepaare in Abstand $\le r$</font> $\Rightarrow$ $f(x, \eta) = \sum_{i \ge 1}1_{|x - x_i| \le r}$ </li>
+						</ul>
+					</section>
+
+					<section>
+						<h2>Mecke Gleichung</h2>
+						<blockquote style="width:950px;">
+							Sei $\eta = \sum_{i \ge 1} \delta_{X_i}$ ein Poisson'scher Punktprozess mit Intensit&auml;tsma&szlig; $\lambda$. Dann, 
+							<font color = "blue">$$\E\Big[\sum_{i \ge 1} f(X_i, \eta)\Big] = \int_{\R^d}\E[f(x, \eta + \delta_x)]\lambda(d x).$$</font>
+						</blockquote>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Transformationen des Poissonprozesses</h2>
+						<img src='http://www.mathematik.uni-muenchen.de/~hirsch/kaggle/transformer.jpg'></img>
+					</section>
+					<section>
+						<h2>Mapping, Marking, Thinnings</h2>
+						<p> $\{W_t\}_{t \ge 0}$ Brown'sche Bewegung, $f:\R^d\to\R^d$ messbar  <font color = "blue">$\Rightarrow$$\{f(W_t)\}_{t\ge 0} =$ ??</font></p>
+						<ul>
+							<li class = "fragment"> <font color = "blue">MAPPING </font>$\{X_i\}_{i \ge 1}$ PPP   <br><font color = "blue">$\Rightarrow$ $f(\{X_i\}_{i\ge1})$ PPP </font></li>
+							<li class = "fragment"> <font color = "blue">SUPERPOSITION </font>$\{X_i\}_{i \ge 1}, \{Y_i\}_{i \ge 1}$ PPP; unabh&auml;gig  <font color = "blue">$\Rightarrow$$\{X_i\}_{i \ge 1} \cup \{Y_i\}_{i \ge 1}$ PPP </font></li>
+							<li class = "fragment"> <font color = "blue">MARKING </font>$\{X_i\}_{i \ge 1}$ PPP, $\{U_i\}_{i \ge 1}$ iid; unabh&auml;gig <br> <font color = "blue">$\Rightarrow$$\{(X_i, U_i)\}_{i \ge 1}$ PPP </font></li>
+							<li class = "fragment"> <font color = "blue">THINNING </font>$\{X_i\}_{i \ge 1}$ PPP, $\{U_i\}_{i \ge 1}$ iid; unabh&auml;gig <br><font color = "blue">$\Rightarrow$ $\{X_i:\, U_i \in A\}$ PPP</font> </li>
+						</ul>
+					</section>
+
+					<section>
+						<h2>Mapping</h2>
+						<blockquote style="width:950px;">
+							Sei $\eta = \sum_{i\ge1} \delta_{X_i}$ ein PPP in $\R^d$ mit I-ma&szlig; $\lambda$ und $T:\, \R^d\to \R^{d'}$ messbar. <br> <font color = "blue">$\Rightarrow$ $T(\eta) = \sum_{i\ge1} \delta_{T(X_i)}$ PPP
+							</font> mit I-ma&szlig; $\lambda \circ T^{-1}$. 
+						</blockquote>
+					</section>
+
+					<section>
+						<h2>Superposition</h2>
+						<blockquote style="width:950px;">
+							Sei $\{\eta_i\}_{i\ge1}$ unabh&auml;ngige PPP mit I-ma&szlig;en $\{\lambda_i\}_{i\ge1}$.<br></br>
+							<font color = "blue">$\Rightarrow$ $\eta = \sum_{i\ge1} \eta_i$ Poissonprozess</font> mit I-ma&szlig; $\sum_{i\ge1}\lambda_i$.				
+						</blockquote>
+					</section>
+
+					<section>
+						<h2>Einschr&auml;nkung</h2>
+						<blockquote style="width:950px;">
+							Sei $\eta = \sum_{i\ge1} \delta_{X_i}$ ein PPP in $\R^d$ mit I-ma&szlig; $\lambda$ und $C_1, C_2, \ldots \in \mc{B}^d$ pw. disjunkt. Setze $\eta_{C_i}(\cdot) = \eta(\cdot \cap C_i)$<br></br> 
+							<font color = "blue">$\Rightarrow$ $\{\eta_{C_i}\}_{i \ge 1}$ unabh&auml;ngige PPP</font> mit I-ma&szlig;en $\{\lambda_i\}_{i \ge 1}$.				
+						</blockquote>
+					</section>
+
+
+					<section>
+						<h2>Marking</h2>
+						<blockquote style="width:950px;">
+							Sei $\eta = \sum_{i\ge1} \delta_{X_i}$ ein Poissonprozess in $\R^d$ mit I-ma&szlig; $\lambda$ und $\{U_i\}_{i\ge1}$ iid Zufallsvektoren mit Verteilung $\mathbb{Q}$. Seien weiterhin $\eta$ und $\{U_i\}_{i\ge1}$ unabh&auml;ngig. 
+							<br></br>
+							<font color = "blue">$\Rightarrow$ $\sum_{i\ge1} \delta_{(X_i,U_i)}$ Poissonprozess</font> mit I-ma&szlig; $\lambda \otimes \mathbb{Q}$. 
+						</blockquote>
+					</section>
+
+					<section>
+						<h2>Thinning</h2>
+						<blockquote style="width:950px;">
+							Sei $\eta = \sum_{i\ge1} \delta_{X_i}$ ein Poissonprozess in $\R^d$ mit I-ma&szlig; $\lambda$. Weiterhin sei $\eta'$ eine unabh&auml;ngige Ausd&uuml;nnung von $\eta$ mit &Uuml;berlebenswahrscheinlichkeit $p>0$.
+							<br></br>
+							<font color = "blue">$\Rightarrow$ $\eta'$ Poissonprozess</font> mit I-ma&szlig; $p\lambda$. 
+						</blockquote>
+					</section>
+
+
+
+				</section>
+				<section>
+					<h2>Literatur</h2>
+					<p>G. Last and M. D. Penrose. <i>Lectures on the Poisson Process</i>. Cambridge University Press, 2017</p>
+
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="static/head.min.js"></script>
+		<script src="static/reveal.js"></script>
+
+		<script>
+
+Reveal.initialize({
+	controls: true,
+	progress: true,
+	slideNumber: true,
+	history: true,
+	center: true,
+
+	transition: 'slide', 
+
+	// Optional reveal.js plugins
+	dependencies: [
+	{ src: 'static/math.js', async: true }
+	]
+});
+
+		</script>
+
+
+	</body>
+</html>
